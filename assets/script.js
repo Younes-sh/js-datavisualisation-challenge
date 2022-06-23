@@ -1,51 +1,52 @@
 var table1 = document.getElementById("table1");
 var table2 = document.getElementById("table2");
+var bodyContent = document.getElementById("bodyContent");
 
-//graph 1 Labels
-var lableGraph = [];
-var RowTable = Array.from(table1.querySelectorAll("tbody>tr")); 
+//Set up graph 1 Labels
+var graph1LabelsArray = [];
+var table1RowsArray = Array.from(table1.querySelectorAll("tbody>tr")); 
 
-Array.from(RowTable[0].querySelectorAll("th")).forEach(element => {
-    if(hasNumber(element.innerHTML)){
-        lableGraph.push(element.innerHTML);
+Array.from(table1RowsArray[0].querySelectorAll("th")).forEach(element => {
+    if(hasNumber(element.textContent)){
+        graph1LabelsArray.push(element.textContent);
     }
 });
 
-//  Table1
-var arrayTable1 = [];
-var dataTable1 = [];
+//Get table 1 Datas and DataLabels
+var table1DatasArray = [];
+var table1DataLabelsArray = [];
 
-RowTable.splice(0, 1);
+table1RowsArray.splice(0, 1);
 
-RowTable.forEach(element => {
-    let tablesArray = [];
+table1RowsArray.forEach(element => {
+    let table1AllTableDataArray = [];
     Array.from(element.querySelectorAll("td")).forEach((element, index) => {
         if(index == 0){
-            dataTable1.push((element.innerHTML).replace(/[^a-zA-Z ]/g, ""));
+            table1DataLabelsArray.push((element.textContent).replace(/[^a-zA-Z ]/g, ""));
         }
-        if(hasNumber(element.innerHTML)){
-            tablesArray.push(parseFloat((element.innerHTML).replace(",", ".")));
+        if(hasNumber(element.textContent)){
+            table1AllTableDataArray.push(parseFloat((element.textContent).replace(",", ".")));
         }
     });
-    arrayTable1.push(tablesArray);
+    table1DatasArray.push(table1AllTableDataArray);
 });
 
-//Creat Line
-var dataGraph1 = creatLine(arrayTable1, dataTable1);
+//Set up graph 1 Data Objects
+var graph1DataObjectsArray = CreateMultipleLinesGraphDataObjectsArray(table1DatasArray, table1DataLabelsArray);
 
 //Set up graph 1 aria label
-var tableGraph ;
+var graph1ArialLabel = "Graph about the crimes recorded by the police on 10 years in differents countries";
 
 //create graph 1 
-CreateGraph(null, table1, "graph1", "graph1", "800px", "600px", tableGraph, "img", lableGraph, dataGraph1, {}, "line");
+CreateGraph(null, table1, "graph1", "graph1", "800px", "600px", graph1ArialLabel, "img", graph1LabelsArray, graph1DataObjectsArray, {}, "line");
 
 //Set up graph 2 and 2Bis Titles and Subtitles
-var graphTit = table2.querySelector("caption").innerHTML;
-var graphTwoTitle = table2.querySelectorAll("thead>tr>th")[2].innerHTML;
-var graphTwo = table2.querySelectorAll("thead>tr>th")[3].innerHTML;
+var graph2Title = table2.querySelector("caption").textContent;
+var graph2Subtitle = table2.querySelectorAll("thead>tr>th")[2].textContent;
+var graph2BisSubtitle = table2.querySelectorAll("thead>tr>th")[3].textContent;
 
-var graph2Options = CreateGraphOptions(false, graphTwoTitle);
-var graph2BisOptions = CreateGraphOptions(false, graphTwo);
+var graph2Options = CreateGraphOptions(false, graph2Subtitle);
+var graph2BisOptions = CreateGraphOptions(false, graph2BisSubtitle);
 
 //Get graph 2 and 2 bis Datas and DataLabels
 var graph2DatasArray = [];
@@ -56,9 +57,9 @@ var graph2DataLabelsArray = [];
 var table2RowsArray = Array.from(table2.querySelectorAll("tbody>tr"));
 table2RowsArray.forEach(element => {
     let table2TDsArray = Array.from(element.querySelectorAll("td"));
-    graph2DataLabelsArray.push(table2TDsArray[0].innerHTML);
-    graph2DatasArray.push(parseFloat(table2TDsArray[1].innerHTML));
-    graph2BisDatasArray.push(parseFloat(table2TDsArray[2].innerHTML));
+    graph2DataLabelsArray.push(table2TDsArray[0].textContent);
+    graph2DatasArray.push(parseFloat(table2TDsArray[1].textContent));
+    graph2BisDatasArray.push(parseFloat(table2TDsArray[2].textContent));
 });
 
 //Set up graph 2 and 2 bis Data Objects
@@ -73,7 +74,7 @@ var graph2BisArialLabel = "Graph about the prison population on average during y
 //Create graph 2 div 
 var graph2Div = document.createElement("div");
 var graph2MainTitle = document.createElement("p");
-graph2MainTitle.innerHTML = graphTit;
+graph2MainTitle.textContent = graph2Title;
 graph2MainTitle.setAttribute("class", "col-lg-12 col-md-12 col-sm-12 col-xs-12 text-center");
 graph2Div.appendChild(graph2MainTitle);
 
@@ -89,13 +90,13 @@ var graphServerDataLabelsArray = [];
 var graphServer = null;
 var iterationCount = 0;
 
-dataPoint();
+getDataPoints();
 
-function dataPoint()
+function getDataPoints()
 {
-    const url_canvas = `https://canvasjs.com/services/data/datapoints.php?cache=${Math.random() * 1000000}`;
+    const noCacheURL = `https://canvasjs.com/services/data/datapoints.php?cache=${Math.random() * 1000000}`;
 
-    fetch(url_canvas)
+    fetch(noCacheURL)
     .then(response => {
         return response.json();
     })
@@ -104,8 +105,8 @@ function dataPoint()
     });
 
     setTimeout(() => {
-        dataPoint();
-    }, 3000);
+        getDataPoints();
+    }, 1000);
 }
 
 function UpdateGraph(dataArray){
@@ -134,19 +135,19 @@ function UpdateGraph(dataArray){
     }
 }
 
-// change chart
+//////////////////////////////////////////////////////////////////////////// CUSTOM FUNCTIONS ////////////////////////////////////////////////////////////////////////////
 
-// function addData(chart, label, dataPoints) {
-//     for(let i in label){
-//         chart.config.data.labels.push(label[i]);
-//     }
-//     for(let j in dataPoints){
-//         chart.config.data.datasets.forEach((dataset) => {
-//             dataset.data.push(dataPoints[j]);
-//         });
-//     }
-//     chart.update();
-// }
+function addData(chart, label, dataPoints) {
+    for(let i in label){
+        chart.config.data.labels.push(label[i]);
+    }
+    for(let j in dataPoints){
+        chart.config.data.datasets.forEach((dataset) => {
+            dataset.data.push(dataPoints[j]);
+        });
+    }
+    chart.update();
+}
 
 /**
  * Function to create a graph with the given parameters
@@ -237,7 +238,7 @@ function CreateGraphOptions(responsive, title, subtitle){
  * @param {Array} dataLabelsArray Array of data labels
  * @returns An array of data Objects
  */
-function creatLine(datasArray, dataLabelsArray){
+function CreateMultipleLinesGraphDataObjectsArray(datasArray, dataLabelsArray){
     var dataObjectsArray = [];
 
     for(let i = 0; i < datasArray.length; i++){
